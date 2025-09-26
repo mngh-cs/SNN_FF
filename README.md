@@ -1,102 +1,105 @@
-# SNN_FF
-Training Spiking Neural Network with the Forward-Forward Algorithm
+Got it 👍 — here’s the **well-formatted README.md content** you can directly copy-paste into your repository:
 
-Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm
+---
+
+# Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm
 
 This repository contains the implementation and experiments from the paper:
 
-Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm
-Mohammadnavid Ghader, Saeed Reza Kheradpisheh, Bahar Farahani, Mahmood Fazlali (2025)
+> **Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm**
+> Mohammadnavid Ghader, Saeed Reza Kheradpisheh, Bahar Farahani, Mahmood Fazlali (2025)
 
-📌 Overview
+---
 
-Spiking Neural Networks (SNNs) provide a biologically inspired way of computation by mimicking the brain’s spike-based communication. However, training them with traditional backpropagation (BP) is inefficient and biologically implausible.
+## 📌 Overview
 
-This work introduces a training framework for SNNs based on the Forward-Forward (FF) algorithm—a method proposed by Geoffrey Hinton that replaces the forward–backward training cycle with two forward passes.
+Spiking Neural Networks (SNNs) provide a biologically inspired way of computation by mimicking the brain’s spike-based communication. However, training them with traditional **backpropagation (BP)** is inefficient and biologically implausible.
 
-✨ Key Features
+This work introduces a training framework for SNNs based on the **Forward-Forward (FF) algorithm**—a method proposed by Geoffrey Hinton that replaces the forward–backward training cycle with **two forward passes**.
 
-No backpropagation: training is forward-only.
+### ✨ Key Features
 
-Layer-wise localized learning: each layer learns independently using a “goodness” measure.
+* **No backpropagation:** training is forward-only
+* **Layer-wise localized learning:** each layer learns independently using a “goodness” measure
+* **Biological plausibility:** avoids issues like weight transport and global error signals
+* **Neuromorphic hardware-friendly:** efficient and well-suited for low-power implementations
+* **Competitive results:** accuracy comparable to or better than backpropagation-trained SNNs
 
-Biological plausibility: avoids issues like weight transport and global error signals.
+---
 
-Neuromorphic hardware-friendly: efficient and well-suited for low-power implementations.
+## 🧪 Datasets
 
-Competitive results: accuracy comparable to or better than backpropagation-trained SNNs.
+The method was tested on both **static** and **spiking/temporal** datasets:
 
-🧪 Datasets
+* **Static:** MNIST, Fashion-MNIST, Kuzushiji-MNIST, CIFAR-10
+* **Spiking:** N-MNIST, SHD (Spiking Heidelberg Digits)
 
-The method was tested on both static and spiking/temporal datasets:
+---
 
-Static: MNIST, Fashion-MNIST, Kuzushiji-MNIST, CIFAR-10
-
-Spiking: N-MNIST, SHD (Spiking Heidelberg Digits)
-
-📊 Results
+## 📊 Results
 
 Our Forward-Forward-trained SNN:
 
-Achieves 98.34% accuracy on MNIST with a lightweight architecture.
+* Achieves **98.34%** accuracy on MNIST with a lightweight architecture
+* Outperforms other FF-based SNNs on static datasets
+* Performs **competitively with state-of-the-art BP-based SNNs** on spiking datasets like SHD
+* Requires **fewer time steps (10)**, reducing computational cost compared to traditional SNN training
 
-Outperforms other FF-based SNNs on static datasets.
+---
 
-Performs competitively with state-of-the-art BP-based SNNs on spiking datasets like SHD.
+## ⚙️ Implementation
 
-Requires fewer time steps (10), reducing computational cost compared to traditional SNN training.
+* Framework: **PyTorch** with [snntorch](https://snntorch.readthedocs.io)
+* Training setup:
 
-⚙️ Implementation
+  * Optimizer: Adam
+  * Learning rate: 0.001
+  * Epochs: 300 (500 for SHD)
+  * Batch size: 4096
+* Neuron model: **Leaky Integrate-and-Fire (LIF)** with learnable membrane time constants
 
-Framework: PyTorch with snntorch
+---
 
-Training setup:
+## 🚀 How It Works
 
-Optimizer: Adam
+1. Input samples are combined with labels to generate **positive** (true label) and **negative** (wrong label) pairs
+2. Two forward passes are performed:
 
-Learning rate: 0.001
+   * Positive pass → maximize neuron “goodness”
+   * Negative pass → minimize neuron “goodness”
+3. Each layer updates weights locally based on a contrastive loss
+4. During inference, labels are tested by embedding and selecting the one with the **highest goodness score**
 
-Epochs: 300 (500 for SHD)
+---
 
-Batch size: 4096
+## 📂 Repository Structure
 
-Neuron model: Leaky Integrate-and-Fire (LIF) with learnable membrane time constants
-
-🚀 How It Works
-
-Input samples are combined with labels to generate positive (true label) and negative (wrong label) pairs.
-
-Two forward passes are performed:
-
-Positive pass → maximize neuron “goodness”
-
-Negative pass → minimize neuron “goodness”
-
-Each layer updates weights locally based on a contrastive loss.
-
-During inference, labels are tested by embedding and selecting the one with the highest goodness score.
-
-📂 Repository Structure
+```
 ├── data/              # Datasets (or links/instructions to download)
 ├── models/            # Network definitions
 ├── experiments/       # Training scripts & configs
 ├── results/           # Logs, plots, and accuracy tables
 ├── README.md          # Project overview (this file)
+```
 
-🔮 Future Work
+---
 
-Optimization for neuromorphic chips.
+## 🔮 Future Work
 
-Extension to larger and more complex datasets.
+* Optimization for neuromorphic chips
+* Extension to larger and more complex datasets
+* Exploration of hybrid learning methods combining FF with other biologically inspired algorithms
 
-Exploration of hybrid learning methods combining FF with other biologically inspired algorithms.
+---
 
-📄 Citation
+## 📄 Citation
 
 If you use this code, please cite:
 
+```
 @article{ghader2025ff-snn,
   title={Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm},
   author={Ghader, Mohammadnavid and Kheradpisheh, Saeed Reza and Farahani, Bahar and Fazlali, Mahmood},
   year={2025}
 }
+```
