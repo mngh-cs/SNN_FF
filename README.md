@@ -14,6 +14,9 @@ This work introduces a training framework for SNNs based on the **Forward-Forwar
 * **Neuromorphic hardware-friendly:** efficient and well-suited for low-power implementations
 * **Competitive results:** accuracy comparable to or better than backpropagation-trained SNNs
 
+ANN_FF Folder: The codes related to comparing our spiking method with other existing ANN models
+SNN_FF Folder: The codes related to comparing our spiking method with other existing SNN models
+
 ---
 
 ## 🧪 Datasets
