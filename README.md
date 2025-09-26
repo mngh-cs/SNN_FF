@@ -36,18 +36,6 @@ Our Forward-Forward-trained SNN:
 
 ---
 
-## 🚀 How It Works
-
-1. Input samples are combined with labels to generate **positive** (true label) and **negative** (wrong label) pairs
-2. Two forward passes are performed:
-
-   * Positive pass → maximize neuron “goodness”
-   * Negative pass → minimize neuron “goodness”
-3. Each layer updates weights locally based on a contrastive loss
-4. During inference, labels are tested by embedding and selecting the one with the **highest goodness score**
-
----
-
 ## 📄 Citation
 
 If you use this code, please cite:
