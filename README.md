@@ -44,6 +44,8 @@ Our Forward-Forward-trained SNN:
 
 ## Citation
 
+The paper is available at the following link: https://arxiv.org/abs/2502.20411
+
 If you use this code, please cite:
 
 ```
