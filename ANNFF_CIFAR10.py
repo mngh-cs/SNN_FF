@@ -1,0 +1,328 @@
+import snntorch as snn
+from snntorch import spikeplot as splt
+from snntorch import spikegen, surrogate
+import torch
+import matplotlib.pyplot as plt
+import torch.nn as nn
+import torch.nn.functional as F
+from torch import split
+from torch.optim import Adam
+import numpy as np
+from torchvision.datasets import MNIST, CIFAR10
+from torchvision.transforms import Compose, ToTensor, Normalize, Lambda, Grayscale
+from torch.utils.data import DataLoader
+import os
+
+
+
+torch.manual_seed(42)
+
+beta = 0.8
+threshold = 1.2
+num_steps = 10
+num_hidden = 2000
+
+spike_grad1 = surrogate.fast_sigmoid() 
+spike_grad2 = surrogate.FastSigmoid.apply  
+spike_grad3 = surrogate.fast_sigmoid(slope=75)  
+spike_grad4 = surrogate.atan(alpha=4)
+spike_grad5 = surrogate.SparseFastSigmoid
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+class UnitLength(nn.Module):
+    def forward(self, x):
+        return F.normalize(x)
+
+class LayerOutputs:
+    def __init__(self, model, x):
+        self.layers = iter(model)
+        self.x = x
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        layer = next(self.layers)
+        self.x = layer(self.x)
+        return self.x
+
+
+spk1_rec_global = []
+spk2_rec_global = []
+spk3_rec_global = []
+fc1_global = []
+
+class LeakyLayer(nn.Module):
+
+    def __init__(self, input_size, output_size):
+        super(LeakyLayer, self).__init__()
+        self.fc1 = nn.Linear(input_size, output_size)
+        self.lif1 = snn.Leaky(beta=beta, threshold=threshold, spike_grad=spike_grad4, learn_threshold=True, learn_beta=True)
+        self.layer_outputs = []
+        self.num_steps = num_steps
+
+
+    def forward(self, x):
+        global spk1_rec_global
+        mem1 = self.lif1.init_leaky()
+
+        spk1_rec = []
+        mem1_rec = []
+
+        for step in range(self.num_steps):
+            cur1 = self.fc1(x)
+            spk1, mem1 = self.lif1(cur1, mem1)
+
+            spk1_rec.append(spk1)
+            mem1_rec.append(mem1)
+
+            mem_rec_global = mem1_rec
+            spk1_rec_global = spk1_rec
+
+        result = torch.stack(mem1_rec, dim=0).mean(dim=0)
+        return result
+
+class LeakyLayer2(nn.Module):
+
+    def __init__(self, input_size, output_size):
+        super(LeakyLayer2, self).__init__()
+        self.fc2 = nn.Linear(input_size, output_size)
+        self.lif2 = snn.Leaky(beta=beta, threshold=threshold, spike_grad=spike_grad4, learn_threshold=True)
+        self.layer_outputs = []
+        self.num_steps = num_steps
+
+    def forward(self, x):
+        global spk2_rec_global
+        mem2 = self.lif2.init_leaky()
+
+        spk2_rec = []
+        mem2_rec = []
+
+        for step in range(self.num_steps):
+            cur2 = self.fc2(spk1_rec_global[step])
+            cur2 = F.normalize(cur2)
+            spk2, mem2 = self.lif2(cur2, mem2)
+
+            spk2_rec.append(spk2)
+            mem2_rec.append(mem2)
+
+            spk2_rec_global = spk2_rec
+
+        result = torch.stack(mem2_rec, dim=0).mean(dim=0)
+
+        return result
+
+class LeakyLayer3(nn.Module):
+
+    def __init__(self, input_size, output_size):
+        super(LeakyLayer3, self).__init__()
+        self.fc3 = nn.Linear(input_size, output_size)
+        self.lif3 = snn.Leaky(beta=beta, threshold=threshold, spike_grad=spike_grad4)
+        self.layer_outputs = []
+        self.num_steps = num_steps
+
+    def forward(self, x):
+        global spk3_rec_global
+        mem3 = self.lif3.init_leaky()
+
+        spk3_rec = []
+        mem3_rec = []
+
+        for step in range(self.num_steps):
+            cur3 = self.fc3(spk2_rec_global[step])
+            cur3 = F.normalize(cur3)
+            spk3, mem3 = self.lif3(cur3, mem3)
+
+            spk3_rec.append(spk3)
+            mem3_rec.append(mem3)
+
+            spk3_rec_global = spk3_rec
+
+        result = torch.stack(mem3_rec, dim=0).sum(dim=0)
+
+        return result
+
+
+class LeakyLayer4(nn.Module):
+
+    def __init__(self, input_size, output_size):
+        super(LeakyLayer4, self).__init__()
+        self.fc4 = nn.Linear(input_size, output_size)
+        self.lif4 = snn.Leaky(beta=beta, threshold=threshold, spike_grad=spike_grad1)
+        self.layer_outputs = []
+        self.num_steps = num_steps
+
+    def forward(self, x):
+        global spk3_rec_global
+        mem4 = self.lif4.init_leaky()
+        spk4_rec = []
+        mem4_rec = []
+
+        for step in range(self.num_steps):
+            cur4 = self.fc4(spk3_rec_global[step])
+            cur4 = F.normalize(cur4)
+            spk4, mem4 = self.lif4(cur4, mem4)
+
+            spk4_rec.append(spk4)
+            mem4_rec.append(mem4)
+
+        result = torch.stack(mem4_rec, dim=0).sum(dim=0)
+
+        return result
+
+def visualise_sample(x, title='', sample_index=0):
+    img = x[sample_index].cpu().reshape(28, 28)
+    plt.figure(figsize = (4, 4))
+    plt.title(title)
+    plt.imshow(img, cmap="gray")
+    plt.show()
+
+batch_size=4096
+
+save_path = './data/MNIST/baked/'
+os.makedirs(save_path, exist_ok=True)
+file_path = lambda x: os.path.join(save_path, x)
+
+transform = Compose([
+    ToTensor(),
+    Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    Lambda(lambda x: torch.flatten(x))])
+
+train_set = CIFAR10('./data/', train=True, download=True, transform=transform)
+test_set = CIFAR10('./data/', train=False, download=True, transform=transform)
+
+train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False)
+test_loader = DataLoader(test_set, batch_size=len(test_set), shuffle=False)
+
+test_x, test_y = next(iter(test_loader))
+test_x = test_x.to(device)
+test_y = test_y.to(device)
+
+def superimpose_label(x, y):
+    x = x.clone()
+    x[:, :10] = 0
+    x[range(x.shape[0]), y] = x.max()
+    return x
+
+# %%
+def goodness(h):
+    return h.pow(4).mean(1)
+
+@torch.no_grad()
+def goodness_per_class(model, x):
+    g_per_label = []
+    for label in range(10):
+        x_candidate = superimpose_label(x, label)
+        g_candidate = sum(goodness(h) for h in LayerOutputs(model, x_candidate))
+        g_per_label.append(g_candidate.unsqueeze(1))
+    return torch.cat(g_per_label, 1)
+
+@torch.no_grad()
+def predict(model, x):
+    return goodness_per_class(model, x).argmax(1)
+
+# %%
+def make_examples(model, x, y_true, epsilon=1e-12):
+    g = goodness_per_class(model, x)
+    g[range(x.shape[0]), y_true] = 0
+    y_hard = torch.multinomial(torch.sqrt(g) + epsilon, 1).squeeze(1)
+
+    x_pos = superimpose_label(x, y_true)
+    x_neg = superimpose_label(x, y_hard)
+    return x_pos, x_neg
+
+# %%
+def swish_loss(h_pos, h_neg, alpha=6.0):
+    g_pos, g_neg = goodness(h_pos), goodness(h_neg)
+    Delta = g_pos - g_neg
+    return (F.silu(-alpha * Delta).mean())
+
+# %%
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('Using device:', device)
+
+n_units = num_hidden
+model = nn.Sequential(
+    nn.Sequential(LeakyLayer(3072, n_units)),
+    nn.Sequential(LeakyLayer2(n_units, n_units)),
+
+).to(device)
+
+train_final_list = {'epoch':[], 'train_acc':[]}
+test_final_list = {'epoch':[], 'test_acc':[]}
+
+
+def print_batch_accuracy(data, targets, train=False):
+    output, _ = model(data.view(batch_size, -1))
+    _, idx = output.sum(dim=0).max(1)
+    acc = np.mean((targets == idx).detach().cpu().numpy())
+
+def print_evaluation(epoch=None):
+    global model, x_tr, y_tr, test_x, test_y
+    error_rate = lambda x, y: 1.0 - torch.mean((x == y).float()).item()
+    prediction_error = lambda x, y: error_rate(predict(model, x), y)
+    test_error = prediction_error(test_x, test_y)
+    epoch_str = 'init' if epoch is None else f"{epoch:>4d}"
+    print(f"[{epoch_str}] Test Acc: {(1-test_error)*100:>5.2f}%")
+
+def test_rec(epoch=None):
+    global model, x_tr, y_tr, test_x, test_y
+    error_rate = lambda x, y: 1.0 - torch.mean((x == y).float()).item()
+    prediction_error = lambda x, y: error_rate(predict(model, x), y)
+    test_error = prediction_error(test_x, test_y)
+    epoch_str = 'init' if epoch is None else f"{epoch:>4d}"
+
+    test_final_list['epoch'].append(epoch)
+    test_final_list['test_acc'].append(round(((1-test_error)*100),2))
+
+    with open("test_acc.txt", "w") as f:
+        for acc in test_final_list['test_acc']:
+            f.write(str(acc))
+            f.write("\n")
+
+torch.manual_seed(42)
+loss_fn = swish_loss
+learning_rate = 0.0008
+optimiser = Adam(model.parameters(), lr=learning_rate)
+num_epochs = 1 + (300)
+
+for epoch in range(num_epochs):
+    spike_rate_list={'layer1':[], 'layer2':[]}
+    iter_counter = 0
+
+    for x, y in iter(train_loader):
+        x = x.to(device)
+        y = y.to(device)
+
+        x_pos, x_neg = make_examples(model, x, y)
+
+        for layer in model:
+            h_pos, h_neg = layer(x_pos), layer(x_neg)
+            loss = loss_fn(h_pos, h_neg)
+
+            if 75 > epoch >= 50:
+              learning_rate = 0.0003 
+
+            if 100 > epoch >= 75:
+              learning_rate = 0.00001  
+
+            if epoch >=100:
+              learning_rate = 0.000001  
+
+
+            optimiser.zero_grad()
+            loss.backward()
+
+            optimiser.step()
+            with torch.no_grad():
+                x_pos, x_neg = layer(x_pos), layer(x_neg)
+
+    test_rec(epoch)
+
+    if (epoch + 1) % 1 == 0:
+        print_evaluation(epoch)
+
+print("Max_Acc:", max(test_final_list['test_acc']))
+print("Argmax: ", np.argmax(np.array(test_final_list['test_acc'])))
