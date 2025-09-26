@@ -16,8 +16,8 @@ This work introduces a training framework for SNNs based on the **Forward-Forwar
 
 ## 🗂️ Folders Guide
 
-* ANN_FF Folder: The codes related to comparing our spiking method with other existing ANN models
-* SNN_FF Folder: The codes related to comparing our spiking method with other existing SNN models
+* **ANN_FF Folder:** The codes related to comparing our spiking method with other existing ANN models
+* **SNN_FF Folder:** The codes related to comparing our spiking method with other existing SNN models
 
 ---
 
