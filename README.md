@@ -1,12 +1,5 @@
 # Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm
 
-This repository contains the implementation and experiments from the paper:
-
-> **Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm**
-> Mohammadnavid Ghader, Saeed Reza Kheradpisheh, Bahar Farahani, Mahmood Fazlali (2025)
-
----
-
 ## 📌 Overview
 
 Spiking Neural Networks (SNNs) provide a biologically inspired way of computation by mimicking the brain’s spike-based communication. However, training them with traditional **backpropagation (BP)** is inefficient and biologically implausible.
