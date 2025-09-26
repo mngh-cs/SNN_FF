@@ -1,12 +1,12 @@
 # Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm
 
-## 📌 Overview
+## Overview
 
 Spiking Neural Networks (SNNs) provide a biologically inspired way of computation by mimicking the brain’s spike-based communication. However, training them with traditional **backpropagation (BP)** is inefficient and biologically implausible.
 
 This work introduces a training framework for SNNs based on the **Forward-Forward (FF) algorithm**—a method proposed by Geoffrey Hinton that replaces the forward–backward training cycle with **two forward passes**.
 
-### ✨ Key Features
+###  Key Features
 
 * **No backpropagation:** training is forward-only
 * **Layer-wise localized learning:** each layer learns independently using a “goodness” measure
@@ -16,14 +16,14 @@ This work introduces a training framework for SNNs based on the **Forward-Forwar
 
 ---
 
-## 🗂️ Folders Guide
+## Folders Guide
 
 * **ANN_FF Folder:** The codes related to comparing our spiking method with other existing ANN models
 * **SNN_FF Folder:** The codes related to comparing our spiking method with other existing SNN models
 
 ---
 
-## 🧪 Datasets
+## Datasets
 
 The method was tested on both **static** and **spiking/temporal** datasets:
 
@@ -32,17 +32,17 @@ The method was tested on both **static** and **spiking/temporal** datasets:
 
 ---
 
-## 📊 Results
+## Results
 
 Our Forward-Forward-trained SNN:
 
 * Outperforms other FF-based SNNs on static datasets
 * Performs **competitively with state-of-the-art BP-based SNNs** on spiking datasets like SHD
-* Requires **fewer time steps (10)**, reducing computational cost compared to traditional SNN training
+* Requires **fewer time steps**, reducing computational cost compared to traditional SNN training
 
 ---
 
-## 📄 Citation
+## Citation
 
 If you use this code, please cite:
 
