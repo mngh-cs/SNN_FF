@@ -1,7 +1,3 @@
-Got it 👍 — here’s the **well-formatted README.md content** you can directly copy-paste into your repository:
-
----
-
 # Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm
 
 This repository contains the implementation and experiments from the paper:
@@ -47,19 +43,6 @@ Our Forward-Forward-trained SNN:
 
 ---
 
-## ⚙️ Implementation
-
-* Framework: **PyTorch** with [snntorch](https://snntorch.readthedocs.io)
-* Training setup:
-
-  * Optimizer: Adam
-  * Learning rate: 0.001
-  * Epochs: 300 (500 for SHD)
-  * Batch size: 4096
-* Neuron model: **Leaky Integrate-and-Fire (LIF)** with learnable membrane time constants
-
----
-
 ## 🚀 How It Works
 
 1. Input samples are combined with labels to generate **positive** (true label) and **negative** (wrong label) pairs
@@ -72,34 +55,17 @@ Our Forward-Forward-trained SNN:
 
 ---
 
-## 📂 Repository Structure
-
-```
-├── data/              # Datasets (or links/instructions to download)
-├── models/            # Network definitions
-├── experiments/       # Training scripts & configs
-├── results/           # Logs, plots, and accuracy tables
-├── README.md          # Project overview (this file)
-```
-
----
-
-## 🔮 Future Work
-
-* Optimization for neuromorphic chips
-* Extension to larger and more complex datasets
-* Exploration of hybrid learning methods combining FF with other biologically inspired algorithms
-
----
-
 ## 📄 Citation
 
 If you use this code, please cite:
 
 ```
-@article{ghader2025ff-snn,
+@article{Ghader2025BackpropagationfreeSN,
   title={Backpropagation-free Spiking Neural Networks with the Forward-Forward Algorithm},
-  author={Ghader, Mohammadnavid and Kheradpisheh, Saeed Reza and Farahani, Bahar and Fazlali, Mahmood},
-  year={2025}
+  author={Mohammadnavid Ghader and Saeed Reza Kheradpisheh and Bahar Farahani and Mahmood Fazlali},
+  journal={ArXiv},
+  year={2025},
+  volume={abs/2502.20411},
+  url={https://api.semanticscholar.org/CorpusID:276725450}
 }
 ```
