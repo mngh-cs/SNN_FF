@@ -29,7 +29,6 @@ The method was tested on both **static** and **spiking/temporal** datasets:
 
 Our Forward-Forward-trained SNN:
 
-* Achieves **98.34%** accuracy on MNIST with a lightweight architecture
 * Outperforms other FF-based SNNs on static datasets
 * Performs **competitively with state-of-the-art BP-based SNNs** on spiking datasets like SHD
 * Requires **fewer time steps (10)**, reducing computational cost compared to traditional SNN training
